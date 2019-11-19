@@ -7,14 +7,14 @@ output: github_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
 ```
 
 TEST 123
 testing 
 
 ```{r}
-library(tidyverse)
-
 h1b_2018 = read.csv(file = "./data/dataset.csv")  
 ## this is a test to read and open the dataset
 ## I created a folder in our project called "data" 
