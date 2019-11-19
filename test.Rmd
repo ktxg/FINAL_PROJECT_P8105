@@ -16,6 +16,8 @@ testing
 dataset = read.csv(file = "./data/dataset.csv")  
 ## this is a test to read and open the dataset
 ## I created a folder in our project called "data" 
-## then inside it I downloaded the dataset and called it "dataset.csv"
+## then inside it I downloaded the dataset and called it "dataset.csv" 
+
+## yay it seems to be working! haha
 ```
 
