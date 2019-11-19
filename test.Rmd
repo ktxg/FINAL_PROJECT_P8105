@@ -11,3 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 TEST 123
 testing 
+
+```{r}
+dataset = read.csv(file = "./data/dataset.csv")  
+```
+
