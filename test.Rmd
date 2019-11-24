@@ -92,7 +92,7 @@ h1b_location_data_big =
   full_join(h1b_employer_50, h1b_worksite_50, by = "state") %>% 
   filter(worksite_number >= 2000 | employer_number >= 2000) 
   
-h1b_location_data_small 
+h1b_location_data_small =
   full_join(h1b_employer_50, h1b_worksite_50, by = "state") %>% 
   filter(worksite_number < 2000 & employer_number < 2000) %>% 
   mutate(employer_number = sum(employer_number),
