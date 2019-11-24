@@ -2,13 +2,15 @@
 title: "Untitled"
 author: "Katie Gao"
 date: "11/19/2019"
-output: github_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
+library(plotly)
+library(viridis)
 ```
 
 TEST 123
@@ -36,6 +38,7 @@ h1b_18_filter = h1b_2018 %>%
   select(-visa_class, -case_status, -employer_country)
 
 
+
 ```
 
 ```{r}
@@ -45,9 +48,88 @@ library(plotly)
 
 ```{r}
 h1b_18_filter%>%
-  ggplot( aes(x=as.numeric(employer_state)),fill=employer_state) + 
-    geom_histogram(bins=20, fill='#69b3a2', color='white') +
-    xlab("state") + 
-    theme_bw()
+  group_by(employer_state) %>%
+  summarize(state_n = n())
 ```
+
+
+```{r}
+h1b_18_filter %>%
+  group_by(employer_state) %>%
+  summarize(state_n = n())%>%
+  filter(state_n > 5000)%>%
+ggplot(aes(x=employer_state, y=state_n)) +
+  geom_bar(stat="identity") +
+  theme(text = element_text(size=12),
+         axis.text.x = element_text(angle=90, vjust=0.5)) +
+  labs(
+    title = "Cases by state",
+    x = "State",
+    y = "Number of cases in each state"
+  )
+```
+```
+
+
+```{r}
+state_number = 
+  h1b_2018 %>%
+  group_by(employer_state) %>%
+  summarize(n = n())
+
+state_number$hover <- with(state_number, paste("State", employer_state, "<br>", "Number", n))
+
+l <- list(color = toRGB("white"), width = 2)
+
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+
+p <- plot_geo(state_number, locationmode = 'USA-states') %>%
+  add_trace(
+    z = ~n, text = ~hover, locations = ~employer_state,
+    color = ~n, colors = 'Purples'
+  ) %>%
+  colorbar(title = "Millions USD") %>%
+  layout(
+    title = '2018 US H1b by State',
+    geo = g
+  )
+
+p
+```
+
+
+
+```{r}
+h1b_location =
+  h1b_18_filter %>% 
+  select(case_number, employer_city, employer_state, worksite_city, worksite_state) 
+
+h1b_location_50 = h1b_location %>% 
+  filter(employer_state != c("DC", "GU",  "MP", "PR", "VI"))
+
+h1b_location_commonwealth =  h1b_location %>% 
+  filter(employer_state == c("DC", "GU",  "MP", "PR", "VI"))
+
+h1b_location_50 %>% 
+  group_by(employer_state) %>% 
+  summarize(n = n()) %>% 
+  mutate(employer_state = fct_reorder(employer_state, n)) %>% 
+  plot_ly(x = ~employer_state, y = ~n, color = ~employer_state, type = "bar")
+
+h1b_location_commonwealth %>% 
+  group_by(employer_state) %>% 
+  summarize(n = n()) %>% 
+  mutate(employer_state = fct_reorder(employer_state, n)) %>% 
+  plot_ly(x = ~employer_state, y = ~n, color = ~employer_state, type = "bar")
+
+```
+
+
+
+
 
