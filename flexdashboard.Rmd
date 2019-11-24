@@ -126,10 +126,52 @@ city_ca %>%
 
 ### Chart D: 
 ```{r}
+h1b_location =
+  h1b_18_filter %>% 
+  select(case_number, employer_city, employer_state, worksite_city, worksite_state) 
+
+h1b_employer_50 = h1b_location %>% 
+  filter(!employer_state %in% c("DC", "GU", "MP", "PR", "VI")) %>% 
+  group_by(employer_state) %>% 
+  summarize(employer_number = n()) %>% 
+  rename("state" = "employer_state")
+
+h1b_worksite_50 = h1b_location %>% 
+  filter(!worksite_state %in% c("DC", "GU", "MH",  "MP", "PR", "VI")) %>% 
+  group_by(worksite_state) %>% 
+  summarize(worksite_number = n()) %>% 
+  rename("state" = "worksite_state")
+
+
+h1b_location_data_big = 
+  full_join(h1b_employer_50, h1b_worksite_50, by = "state") %>% 
+  filter(worksite_number >= 2000 | employer_number >= 2000) 
+  
+h1b_location_data_small =
+  full_join(h1b_employer_50, h1b_worksite_50, by = "state") %>% 
+  filter(worksite_number < 2000 & employer_number < 2000) %>% 
+  mutate(employer_number = sum(employer_number),
+         worksite_number = sum(worksite_number)) %>% 
+  mutate(state = "Others") %>% 
+  select(state, employer_number, worksite_number) 
+
+others = unique(h1b_location_data_small) 
+
+h1b_location_data = 
+  bind_rows(h1b_location_data_big , others)
+  
+
+h1b_location_data %>% 
+  mutate(state = fct_reorder(state, worksite_number)) %>% 
+  plot_ly(x = ~state, y = ~employer_number, type = 'bar', name = 'headquater location') %>% 
+  add_trace(y = ~worksite_number, name = 'work location') %>%
+  layout(yaxis = list(title = 'Count'), barmode = 'group', legend = list(x = 0.1, y = 0.9))
 
   
 
 
 ```
 
-
+```{r}
+rmarkdown::render("flexdashboard.Rmd", output_format = "flexdashboard::flex_dashboard")
+```
