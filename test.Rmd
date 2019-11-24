@@ -54,26 +54,6 @@ h1b_18_filter%>%
 
 
 ```{r}
-h1b_18_filter %>%
-  group_by(employer_state) %>%
-  summarize(state_n = n())%>%
-  filter(state_n > 5000)%>%
-ggplot(aes(x=employer_state, y=state_n)) +
-  geom_bar(stat="identity") +
-  theme(text = element_text(size=12),
-         axis.text.x = element_text(angle=90, vjust=0.5)) +
-  labs(
-    title = "Cases by state",
-    x = "State",
-    y = "Number of cases in each state"
-  )
-```
-```
-
-<<<<<<< HEAD
-## A map showing number of H1b in employer state
-=======
-```{r}
 h1b_location =
   h1b_18_filter %>% 
   select(case_number, employer_city, employer_state, worksite_city, worksite_state) 
@@ -95,7 +75,7 @@ h1b_location_data_big =
   full_join(h1b_employer_50, h1b_worksite_50, by = "state") %>% 
   filter(worksite_number >= 2000 | employer_number >= 2000) 
   
-h1b_location_data_small 
+h1b_location_data_small =
   full_join(h1b_employer_50, h1b_worksite_50, by = "state") %>% 
   filter(worksite_number < 2000 & employer_number < 2000) %>% 
   mutate(employer_number = sum(employer_number),
@@ -116,81 +96,24 @@ h1b_location_data %>%
   layout(yaxis = list(title = 'Count'), barmode = 'group', legend = list(x = 0.1, y = 0.9))
 
 ```
->>>>>>> 55cc5209313f7d1c5a86484b51d3a38eecbcf3f2
 
-```{r}
-state_number = 
-  h1b_2018 %>%
-  group_by(employer_state) %>%
-  summarize(n = n())
 
-state_number$hover <- with(state_number, paste("State", employer_state, "<br>", "Number", n))
 
-g <- list(
-  scope = 'usa',
-  projection = list(type = 'albers usa'),
-  showlakes = TRUE,
-  lakecolor = toRGB('white')
-)
 
-map_1 <- plot_geo(state_number, locationmode = 'USA-states') %>%
-  add_trace(
-    z = ~n, text = ~hover, locations = ~employer_state,
-    color = ~n, colors = 'Purples'
-  ) %>%
-  colorbar(title = "H1b Case Number") %>%
-  layout(
-    title = '2018 US H1b by State',
-    geo = g
-  )
-
-map_1
-```
-
-## A map showing number of H1b in worksite state
+## Map showing number of H1b in worksite state
 
 ```{r}
 state_ws = 
   h1b_2018 %>%
   group_by(worksite_state) %>%
   summarize(n = n())
-
-<<<<<<< HEAD
-```{r}
-h1b_location =
-  h1b_18_filter %>% 
-  select(case_number, employer_city, employer_state, worksite_city, worksite_state) 
-
-h1b_location_50 = h1b_location %>% 
-  filter(employer_state != c("DC", "GU",  "MP", "PR", "VI"))
-
-h1b_location_commonwealth =  h1b_location %>% 
-  filter(employer_state == c("DC", "GU",  "MP", "PR", "VI"))
-
-h1b_location_50 %>% 
-  group_by(employer_state) %>% 
-  summarize(n = n()) %>% 
-  mutate(employer_state = fct_reorder(employer_state, n)) %>% 
-  plot_ly(x = ~employer_state, y = ~n, color = ~employer_state, type = "bar")
-
-h1b_location_commonwealth %>% 
-  group_by(employer_state) %>% 
-  summarize(n = n()) %>% 
-  mutate(employer_state = fct_reorder(employer_state, n)) %>% 
-  plot_ly(x = ~employer_state, y = ~n, color = ~employer_state, type = "bar")
-
-```
-=======
 state_ws$hover <- with(state_ws, paste("State", worksite_state, "<br>", "Number", n))
->>>>>>> 1af1cd3c3cf18d60c273ee20732495c202e182bb
-
 g2 <- list(
   scope = 'usa',
   projection = list(type = 'albers usa'),
   showlakes = TRUE,
   lakecolor = toRGB('white')
 )
-
 map_2 <- plot_geo(state_ws, locationmode = 'USA-states') %>%
   add_trace(
     z = ~n, text = ~hover, locations = ~worksite_state,
@@ -201,11 +124,43 @@ map_2 <- plot_geo(state_ws, locationmode = 'USA-states') %>%
     title = '2018 US H1b by worksite State',
     geo = g2
   )
-
 map_2
 ```
 
-## A graph showing top 10 cities with H1b cases in California state (worksite)
+## Map showing number of H1b in employer state
+
+```{r}
+state_number = 
+  h1b_2018 %>%
+  group_by(employer_state) %>%
+  summarize(n = n())
+
+state_number$hover <- with(state_number, paste("State", employer_state, "<br>", "Number", n))
+
+l <- list(color = toRGB("white"), width = 2)
+
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+
+p <- plot_geo(state_number, locationmode = 'USA-states') %>%
+  add_trace(
+    z = ~n, text = ~hover, locations = ~employer_state,
+    color = ~n, colors = 'Purples'
+  ) %>%
+  colorbar(title = "Millions USD") %>%
+  layout(
+    title = '2018 US H1b by State',
+    geo = g
+  )
+
+p
+```
+
+##Graph showing top 10 cities with H1b cases in California state (worksite)
 
 ```{r}
 city_ca = 
@@ -214,10 +169,7 @@ city_ca =
   group_by(worksite_city) %>%
   summarize(n = n()) %>% 
   filter(min_rank(desc(n)) <= 10)
-
 city_ca %>% 
   mutate(worksite_city = fct_reorder(worksite_city, n)) %>% 
   plot_ly(x = ~worksite_city, y = ~n, color = ~worksite_city, type = "bar")
 ```
-
-
