@@ -126,22 +126,10 @@ city_ca %>%
 
 ### Chart D: 
 ```{r}
-h1b_location =
-  h1b_18_filter %>% 
-  select(case_number, employer_city, employer_state, worksite_city, worksite_state) 
 
-h1b_location_50 = h1b_location %>% 
-  filter(employer_state != c("DC", "GU",  "MP", "PR", "VI"))
+  
 
-h1b_location_50 %>% 
-  group_by(employer_state) %>% 
-  summarize(n = n()) %>% 
-  mutate(employer_state = fct_reorder(employer_state, n)) %>% 
-  plot_ly(x = ~employer_state, y = ~n, type = "bar")
 
 ```
 
-```{r}
-rmarkdown::render("flexdashboard.Rmd", output_format = "flexdashboard::flex_dashboard")
-```
 
