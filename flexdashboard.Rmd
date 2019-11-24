@@ -34,8 +34,6 @@ h1b_18_filter = h1b_2018 %>%
           employer_country == "UNITED STATES OF AMERICA") %>% 
   select(-visa_class, -case_status, -employer_country)
 
-
-
 ```
 
 
