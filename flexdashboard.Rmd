@@ -1,0 +1,66 @@
+---
+title: "flexdashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(viridis)
+library(plotly)
+```
+
+```{r}
+h1b_2018 = read.csv(file = "./data/dataset.csv")  
+## this is a test to read and open the dataset
+## I created a folder in our project called "data" 
+
+## then inside it I downloaded the dataset and called it "dataset.csv" 
+
+## then inside it I downloaded the dataset and called it "dataset.csv"
+
+
+####select the 16 variables which we are interested in
+h1b_18_filter = h1b_2018 %>% 
+  janitor::clean_names() %>% 
+  select(case_number, visa_class, case_status, employer_name, employer_country, employer_city, employer_state,
+         naics_code, soc_code, soc_name, total_workers, employment_start_date, employment_end_date, full_time_position,
+         prevailing_wage, pw_unit_of_pay, worksite_city, worksite_state, h1b_dependent) %>%
+  filter(case_status == "CERTIFIED",
+          visa_class == "H-1B",
+          employer_country == "UNITED STATES OF AMERICA") %>% 
+  select(-visa_class, -case_status, -employer_country)
+
+
+
+```
+
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+
+```
+
+### Chart C
+
+```{r}
+
+```
+
