@@ -2,13 +2,14 @@
 title: "Untitled"
 author: "Katie Gao"
 date: "11/19/2019"
-output: github_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
+library(plotly)
 ```
 
 TEST 123
@@ -18,9 +19,9 @@ testing
 h1b_2018 = read.csv(file = "./data/dataset.csv")  
 ## this is a test to read and open the dataset
 ## I created a folder in our project called "data" 
-<<<<<<< HEAD
+
 ## then inside it I downloaded the dataset and called it "dataset.csv" 
-=======
+
 ## then inside it I downloaded the dataset and called it "dataset.csv"
 
 
@@ -35,6 +36,44 @@ h1b_18_filter = h1b_2018 %>%
           employer_country == "UNITED STATES OF AMERICA") %>% 
   select(-visa_class, -case_status, -employer_country)
 
->>>>>>> 33d6eda33dab238c965f2ad8bc9266dc7ef65a19
 ```
+
+
+```{r}
+state_number = 
+  h1b_2018 %>%
+  group_by(employer_state) %>%
+  summarize(n = n())
+
+state_number$hover <- with(state_number, paste("State", employer_state, "<br>", "Number", n))
+
+l <- list(color = toRGB("white"), width = 2)
+
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+
+p <- plot_geo(state_number, locationmode = 'USA-states') %>%
+  add_trace(
+    z = ~n, text = ~hover, locations = ~employer_state,
+    color = ~n, colors = 'Purples'
+  ) %>%
+  colorbar(title = "Millions USD") %>%
+  layout(
+    title = '2018 US H1b by State',
+    geo = g
+  )
+
+p
+```
+
+
+
+
+
+
+
 
