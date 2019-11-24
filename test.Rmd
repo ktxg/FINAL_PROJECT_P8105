@@ -70,6 +70,7 @@ ggplot(aes(x=employer_state, y=state_n)) +
 ```
 ```
 
+## A map showing number of H1b in employer state
 
 ```{r}
 state_number = 
@@ -79,8 +80,6 @@ state_number =
 
 state_number$hover <- with(state_number, paste("State", employer_state, "<br>", "Number", n))
 
-l <- list(color = toRGB("white"), width = 2)
-
 g <- list(
   scope = 'usa',
   projection = list(type = 'albers usa'),
@@ -88,22 +87,29 @@ g <- list(
   lakecolor = toRGB('white')
 )
 
-p <- plot_geo(state_number, locationmode = 'USA-states') %>%
+map_1 <- plot_geo(state_number, locationmode = 'USA-states') %>%
   add_trace(
     z = ~n, text = ~hover, locations = ~employer_state,
     color = ~n, colors = 'Purples'
   ) %>%
-  colorbar(title = "Millions USD") %>%
+  colorbar(title = "H1b Case Number") %>%
   layout(
     title = '2018 US H1b by State',
     geo = g
   )
 
-p
+map_1
 ```
 
+## A map showing number of H1b in worksite state
 
+```{r}
+state_ws = 
+  h1b_2018 %>%
+  group_by(worksite_state) %>%
+  summarize(n = n())
 
+<<<<<<< HEAD
 ```{r}
 h1b_location =
   h1b_18_filter %>% 
@@ -128,8 +134,44 @@ h1b_location_commonwealth %>%
   plot_ly(x = ~employer_state, y = ~n, color = ~employer_state, type = "bar")
 
 ```
+=======
+state_ws$hover <- with(state_ws, paste("State", worksite_state, "<br>", "Number", n))
+>>>>>>> 1af1cd3c3cf18d60c273ee20732495c202e182bb
 
+g2 <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
 
+map_2 <- plot_geo(state_ws, locationmode = 'USA-states') %>%
+  add_trace(
+    z = ~n, text = ~hover, locations = ~worksite_state,
+    color = ~n, colors = 'Greens'
+  ) %>%
+  colorbar(title = "H1b Case Number") %>%
+  layout(
+    title = '2018 US H1b by worksite State',
+    geo = g2
+  )
 
+map_2
+```
+
+## A graph showing top 10 cities with H1b cases in California state (worksite)
+
+```{r}
+city_ca = 
+  h1b_2018 %>%
+  filter(worksite_state == 'CA') %>% 
+  group_by(worksite_city) %>%
+  summarize(n = n()) %>% 
+  filter(min_rank(desc(n)) <= 10)
+
+city_ca %>% 
+  mutate(worksite_city = fct_reorder(worksite_city, n)) %>% 
+  plot_ly(x = ~worksite_city, y = ~n, color = ~worksite_city, type = "bar")
+```
 
 
