@@ -181,12 +181,14 @@ h1b_soc = h1b_18_filter %>%
     select(case_number, employer_name, naics_code, soc_code, soc_name, total_workers, employment_start_date, employment_end_date, full_time_position)
 
   
-  h1b_soc_con = h1b_soc %>% 
-    select(employer_name, total_workers) %>% 
-    group_by(employer_name) %>% 
-    summarize(total = n()) %>% 
-    arrange(desc(total)) %>% 
-    top_n(15)
+h1b_soc_con = h1b_soc %>% 
+  select(employer_name, total_workers) %>% 
+  group_by(employer_name) %>% 
+  summarize(total = n()) %>% 
+  arrange(desc(total)) %>% 
+  top_n(15)
+
+h1b_soc_con
   
 h1b_soc_con %>% 
   ggplot(aes(x = reorder(employer_name, total), y = total)) +
@@ -194,6 +196,7 @@ h1b_soc_con %>%
   coord_flip() +
   labs(x = 'Companies', y = 'Total Workers', 
        title = 'Top 15 companies who has the most H1B Visa Workers')
+
 ```
   
   
@@ -218,7 +221,8 @@ h1b_soc_ind = h1b_soc %>%
     soc_code_new >= 270000 & soc_code_new < 280000 ~ "Media, Design",
     soc_code_new >= 290000 & soc_code_new < 300000 ~ "Healthcare Practitioner",
     soc_code_new >= 410000 & soc_code_new < 420000 ~ "Sales",
-    TRUE ~ "Others")) 
+    TRUE ~ "Others")) %>% 
+  mutate(soc_code_gen = as.factor(soc_code_gen))
   
 h1b_soc_ind
 ```
@@ -229,17 +233,62 @@ h1b_soc_ind
 h1b_soc_small = h1b_soc_ind %>%
   group_by(soc_code_gen) %>%
   summarize(num_ind = n()) %>% 
-  arrange(desc(num_ind))
+  arrange(desc(num_ind)) %>% 
+  mutate(soc_code_gen = fct_reorder(soc_code_gen, num_ind))
   
-h1b_soc_plot = h1b_soc_small %>% 
-  ggplot(aes(x = reorder(soc_code_gen, num_ind), y = num_ind)) +
-  geom_bar(stat = 'identity') +
-  coord_flip() +
-  labs(x = 'Industries', y = 'Total Workers', 
-       title = 'Industries and number of certified H1B appliants')
-  
-h1b_soc_plot 
+#h1b_soc_plot = h1b_soc_small %>% 
+  #ggplot(aes(x = reorder(soc_code_gen, num_ind), y = num_ind)) +
+  #geom_bar(stat = 'identity') +
+  #coord_flip() +
+  #labs(x = 'Industries', y = 'Total Workers', 
+       #title = 'Industries and number of certified H1B appliants')
+
+h1b_soc_plot = plot_ly(
+    h1b_soc_small, x = ~soc_code_gen, y = ~num_ind, color = ~soc_code_gen, type = "bar", colors = "Set1"
+    ) %>% 
+        layout(title = 'Industries and number of certified H1B applicants',
+           xaxis = list(title = 'Industries'),
+           yaxis = list(title = 'Total Workers'), 
+           showlegend = FALSE)
+
+h1b_soc_plot
 ```
-  
-  
+ 
+ 
+## Length of time employees were contracted.
+```{r}
+library(lubridate)
+h1b_soc_date <- h1b_soc %>%
+  select(employment_start_date, employment_end_date) %>%
+  mutate(employment_start_date = as.Date(employment_start_date),
+         employment_end_date = as.Date(employment_end_date),
+         year_start = year(employment_start_date),
+         year_end = year(employment_end_date),
+         length_time = year_end - year_start, 
+         length_time= as.factor(length_time))
+date_table <- h1b_soc_date %>%
+  group_by(length_time) %>%
+  summarize(num_year = n())
+
+
+ggplot(data = h1b_soc_date, aes(x = length_time)) +
+  geom_bar()
+
+
+str(h1b_soc_date)
+h1b_soc_date
+```
+
+
+```{r}
+money = h1b_18_filter %>% 
+  select(prevailing_wage, pw_unit_of_pay) 
+summary(money)
+```
+
+
+
+
+
+
   
