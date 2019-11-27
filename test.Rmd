@@ -20,13 +20,11 @@ testing
 h1b_2018 = read.csv(file = "./data/dataset.csv")  
 ## this is a test to read and open the dataset
 ## I created a folder in our project called "data" 
-
 ## then inside it I downloaded the dataset and called it "dataset.csv" 
 
-## then inside it I downloaded the dataset and called it "dataset.csv"
 
 
-####select the 16 variables which we are interested in
+### this selects the 16 variables we are interested in
 h1b_18_filter = h1b_2018 %>% 
   janitor::clean_names() %>% 
   select(case_number, visa_class, case_status, employer_name, employer_country, employer_city, employer_state,
@@ -36,8 +34,6 @@ h1b_18_filter = h1b_2018 %>%
           visa_class == "H-1B",
           employer_country == "UNITED STATES OF AMERICA") %>% 
   select(-visa_class, -case_status, -employer_country)
-
-
 
 ```
 
@@ -54,9 +50,52 @@ h1b_18_filter%>%
 
 
 ```{r}
+<<<<<<< HEAD
  
 ```
 
+=======
+h1b_location =
+  h1b_18_filter %>% 
+  select(case_number, employer_city, employer_state, worksite_city, worksite_state) 
+
+h1b_employer_50 = h1b_location %>% 
+  filter(!employer_state %in% c("DC", "GU", "MP", "PR", "VI")) %>% 
+  group_by(employer_state) %>% 
+  summarize(employer_number = n()) %>% 
+  rename("state" = "employer_state")
+
+h1b_worksite_50 = h1b_location %>% 
+  filter(!worksite_state %in% c("DC", "GU", "MH",  "MP", "PR", "VI")) %>% 
+  group_by(worksite_state) %>% 
+  summarize(worksite_number = n()) %>% 
+  rename("state" = "worksite_state")
+
+
+h1b_location_data_big = 
+  full_join(h1b_employer_50, h1b_worksite_50, by = "state") %>% 
+  filter(worksite_number >= 2000 | employer_number >= 2000) 
+  
+h1b_location_data_small =
+  full_join(h1b_employer_50, h1b_worksite_50, by = "state") %>% 
+  filter(worksite_number < 2000 & employer_number < 2000) %>% 
+  mutate(employer_number = sum(employer_number),
+         worksite_number = sum(worksite_number)) %>% 
+  mutate(state = "Others") %>% 
+  select(state, employer_number, worksite_number) 
+
+others = unique(h1b_location_data_small) 
+
+h1b_location_data = 
+  bind_rows(h1b_location_data_big , others)
+  
+
+h1b_location_data %>% 
+  mutate(state = fct_reorder(state, worksite_number)) %>% 
+  plot_ly(x = ~state, y = ~employer_number, type = 'bar', name = 'headquater location') %>% 
+  add_trace(y = ~worksite_number, name = 'work location') %>%
+  layout(yaxis = list(title = 'Count'), barmode = 'group', legend = list(x = 0.1, y = 0.9))
+>>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
 
 
 
@@ -87,6 +126,39 @@ map_2 <- plot_geo(state_ws, locationmode = 'USA-states') %>%
 map_2
 ```
 
+<<<<<<< HEAD
+=======
+
+
+
+## Map showing number of H1b in worksite state
+
+```{r}
+state_ws = 
+  h1b_2018 %>%
+  group_by(worksite_state) %>%
+  summarize(n = n())
+state_ws$hover <- with(state_ws, paste("State", worksite_state, "<br>", "Number", n))
+g2 <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+map_2 <- plot_geo(state_ws, locationmode = 'USA-states') %>%
+  add_trace(
+    z = ~n, text = ~hover, locations = ~worksite_state,
+    color = ~n, colors = 'Greens'
+  ) %>%
+  colorbar(title = "H1b Case Number") %>%
+  layout(
+    title = '2018 US H1b by worksite State',
+    geo = g2
+  )
+map_2
+```
+
+>>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
 ## Map showing number of H1b in employer state
 
 ```{r}
@@ -120,7 +192,11 @@ p <- plot_geo(state_number, locationmode = 'USA-states') %>%
 p
 ```
 
+<<<<<<< HEAD
 ##Graph showing top 10 cities with H1b cases in California state (worksite)
+=======
+## Graph showing top 10 cities with H1b cases in California state (worksite)
+>>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
 
 ```{r}
 city_ca = 
@@ -132,4 +208,127 @@ city_ca =
 city_ca %>% 
   mutate(worksite_city = fct_reorder(worksite_city, n)) %>% 
   plot_ly(x = ~worksite_city, y = ~n, color = ~worksite_city, type = "bar")
+<<<<<<< HEAD
 ```
+=======
+```
+
+
+## Companies that have the most H1B Visa Workers
+```{r}
+h1b_soc = h1b_18_filter %>% 
+    select(case_number, employer_name, naics_code, soc_code, soc_name, total_workers, employment_start_date, employment_end_date, full_time_position)
+
+  
+h1b_soc_con = h1b_soc %>% 
+  select(employer_name, total_workers) %>% 
+  group_by(employer_name) %>% 
+  summarize(total = n()) %>% 
+  arrange(desc(total)) %>% 
+  top_n(15)
+
+h1b_soc_con
+  
+h1b_soc_con %>% 
+  ggplot(aes(x = reorder(employer_name, total), y = total)) +
+  geom_bar(stat = 'identity') +
+  coord_flip() +
+  labs(x = 'Companies', y = 'Total Workers', 
+       title = 'Top 15 companies who has the most H1B Visa Workers')
+
+```
+  
+  
+  
+  
+Regrouping SOC codes broadly - use bls website as source
+```{r}
+h1b_soc_ind = h1b_soc %>%
+  select(soc_code) %>% 
+  mutate(soc_code_new = str_remove_all(soc_code, '-'),
+         soc_code_new = as.integer(soc_code_new)) %>% 
+  na.omit() %>% 
+  mutate(soc_code_gen = case_when(
+    soc_code_new >= 110000 & soc_code_new < 120000 ~ "Management",
+    soc_code_new >= 130000 & soc_code_new < 140000 ~"Business, Finance",
+    soc_code_new >= 150000 & soc_code_new < 160000 ~ "Computer, Math",
+    soc_code_new >= 170000 & soc_code_new < 180000 ~ "Architecture, Engineer",
+    soc_code_new >= 190000 & soc_code_new < 200000 ~ "Life, Physcial, Social Science",
+    soc_code_new >= 210000 & soc_code_new < 220000 ~ "Social Service",
+    soc_code_new >= 230000 & soc_code_new < 240000 ~ "Legal",
+    soc_code_new >= 250000 & soc_code_new < 260000 ~ "Education, Training",
+    soc_code_new >= 270000 & soc_code_new < 280000 ~ "Media, Design",
+    soc_code_new >= 290000 & soc_code_new < 300000 ~ "Healthcare Practitioner",
+    soc_code_new >= 410000 & soc_code_new < 420000 ~ "Sales",
+    TRUE ~ "Others")) %>% 
+  mutate(soc_code_gen = as.factor(soc_code_gen))
+  
+h1b_soc_ind
+```
+  
+  
+## Certified H1B applicants and which industries they are in
+```{r}
+h1b_soc_small = h1b_soc_ind %>%
+  group_by(soc_code_gen) %>%
+  summarize(num_ind = n()) %>% 
+  arrange(desc(num_ind)) %>% 
+  mutate(soc_code_gen = fct_reorder(soc_code_gen, num_ind))
+  
+#h1b_soc_plot = h1b_soc_small %>% 
+  #ggplot(aes(x = reorder(soc_code_gen, num_ind), y = num_ind)) +
+  #geom_bar(stat = 'identity') +
+  #coord_flip() +
+  #labs(x = 'Industries', y = 'Total Workers', 
+       #title = 'Industries and number of certified H1B appliants')
+
+h1b_soc_plot = plot_ly(
+    h1b_soc_small, x = ~soc_code_gen, y = ~num_ind, color = ~soc_code_gen, type = "bar", colors = "Set1"
+    ) %>% 
+        layout(title = 'Industries and number of certified H1B applicants',
+           xaxis = list(title = 'Industries'),
+           yaxis = list(title = 'Total Workers'), 
+           showlegend = FALSE)
+
+h1b_soc_plot
+```
+ 
+ 
+## Length of time employees were contracted.
+```{r}
+library(lubridate)
+h1b_soc_date <- h1b_soc %>%
+  select(employment_start_date, employment_end_date) %>%
+  mutate(employment_start_date = as.Date(employment_start_date),
+         employment_end_date = as.Date(employment_end_date),
+         year_start = year(employment_start_date),
+         year_end = year(employment_end_date),
+         length_time = year_end - year_start, 
+         length_time= as.factor(length_time))
+date_table <- h1b_soc_date %>%
+  group_by(length_time) %>%
+  summarize(num_year = n())
+
+
+ggplot(data = h1b_soc_date, aes(x = length_time)) +
+  geom_bar()
+
+
+str(h1b_soc_date)
+h1b_soc_date
+```
+
+
+```{r}
+money = h1b_18_filter %>% 
+  select(prevailing_wage, pw_unit_of_pay) 
+summary(money)
+```
+
+
+
+
+
+
+  
+>>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
