@@ -340,7 +340,7 @@ h1b_18_adjusted_wage =
 ## this converts all pay wages to yearly 
 h1b_18_adjusted_wage = 
   h1b_18_adjusted_wage %>%
-  ## select(pw_unit_of_pay, adjusted_wage_per_year, prevailing_wage) %>% 
+##select(pw_unit_of_pay, adjusted_wage_per_year, prevailing_wage) %>% 
   mutate(adjusted_wage_per_year = 
            if_else(pw_unit_of_pay == "hour", prevailing_wage * 40 * 52, 
                    if_else(pw_unit_of_pay == "week", prevailing_wage * 52, 
@@ -353,6 +353,3 @@ h1b_18_adjusted_wage =
 
 
 
-
-  
->>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
