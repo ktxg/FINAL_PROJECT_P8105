@@ -50,6 +50,11 @@ h1b_18_filter %>%
 
 
 ```{r}
+<<<<<<< HEAD
+ 
+```
+
+=======
 h1b_location =
   h1b_18_filter %>% 
   select(case_number, employer_city, employer_state, worksite_city, worksite_state) 
@@ -90,9 +95,7 @@ h1b_location_data %>%
   plot_ly(x = ~state, y = ~employer_number, type = 'bar', name = 'headquater location') %>% 
   add_trace(y = ~worksite_number, name = 'work location') %>%
   layout(yaxis = list(title = 'Count'), barmode = 'group', legend = list(x = 0.1, y = 0.9))
-
-```
-
+>>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
 
 
 
@@ -123,6 +126,39 @@ map_2 <- plot_geo(state_ws, locationmode = 'USA-states') %>%
 map_2
 ```
 
+<<<<<<< HEAD
+=======
+
+
+
+## Map showing number of H1b in worksite state
+
+```{r}
+state_ws = 
+  h1b_2018 %>%
+  group_by(worksite_state) %>%
+  summarize(n = n())
+state_ws$hover <- with(state_ws, paste("State", worksite_state, "<br>", "Number", n))
+g2 <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+map_2 <- plot_geo(state_ws, locationmode = 'USA-states') %>%
+  add_trace(
+    z = ~n, text = ~hover, locations = ~worksite_state,
+    color = ~n, colors = 'Greens'
+  ) %>%
+  colorbar(title = "H1b Case Number") %>%
+  layout(
+    title = '2018 US H1b by worksite State',
+    geo = g2
+  )
+map_2
+```
+
+>>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
 ## Map showing number of H1b in employer state
 
 ```{r}
@@ -156,7 +192,11 @@ p <- plot_geo(state_number, locationmode = 'USA-states') %>%
 p
 ```
 
+<<<<<<< HEAD
+##Graph showing top 10 cities with H1b cases in California state (worksite)
+=======
 ## Graph showing top 10 cities with H1b cases in California state (worksite)
+>>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
 
 ```{r}
 city_ca = 
@@ -168,6 +208,9 @@ city_ca =
 city_ca %>% 
   mutate(worksite_city = fct_reorder(worksite_city, n)) %>% 
   plot_ly(x = ~worksite_city, y = ~n, color = ~worksite_city, type = "bar")
+<<<<<<< HEAD
+```
+=======
 ```
 
 
@@ -312,3 +355,4 @@ h1b_18_adjusted_wage =
 
 
   
+>>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
