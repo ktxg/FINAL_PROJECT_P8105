@@ -43,7 +43,7 @@ library(plotly)
 ```
 
 ```{r}
-h1b_18_filter%>%
+h1b_18_filter %>%
   group_by(employer_state) %>%
   summarize(state_n = n())
 ```
@@ -282,6 +282,30 @@ money = h1b_18_filter %>%
 summary(money)
 ```
 
+
+## Converting wage to the same units 
+```{r}
+## this creates a new column for the adjusted wage per year 
+h1b_18_adjusted_wage = 
+  h1b_18_filter %>% 
+  mutate(pw_unit_of_pay = str_to_lower(pw_unit_of_pay), 
+         adjusted_wage_per_year = prevailing_wage)  
+
+## we know that there are 5 levels for pw_unit_of_pay
+## year, hour, week, month, bi-weekly 
+
+## this converts all pay wages to yearly 
+h1b_18_adjusted_wage = 
+  h1b_18_adjusted_wage %>%
+  ## select(pw_unit_of_pay, adjusted_wage_per_year, prevailing_wage) %>% 
+  mutate(adjusted_wage_per_year = 
+           if_else(pw_unit_of_pay == "hour", prevailing_wage * 40 * 52, 
+                   if_else(pw_unit_of_pay == "week", prevailing_wage * 52, 
+                           if_else(pw_unit_of_pay == "month", prevailing_wage * 12, 
+                                   if_else(pw_unit_of_pay == "bi-weekly", prevailing_wage * 26, 
+                                           prevailing_wage)))))
+
+```
 
 
 
