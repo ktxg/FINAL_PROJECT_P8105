@@ -50,11 +50,7 @@ h1b_18_filter %>%
 
 
 ```{r}
-<<<<<<< HEAD
- 
-```
 
-=======
 h1b_location =
   h1b_18_filter %>% 
   select(case_number, employer_city, employer_state, worksite_city, worksite_state) 
@@ -95,7 +91,8 @@ h1b_location_data %>%
   plot_ly(x = ~state, y = ~employer_number, type = 'bar', name = 'headquater location') %>% 
   add_trace(y = ~worksite_number, name = 'work location') %>%
   layout(yaxis = list(title = 'Count'), barmode = 'group', legend = list(x = 0.1, y = 0.9))
->>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
+```
+
 
 
 
@@ -126,10 +123,6 @@ map_2 <- plot_geo(state_ws, locationmode = 'USA-states') %>%
 map_2
 ```
 
-<<<<<<< HEAD
-=======
-
-
 
 ## Map showing number of H1b in worksite state
 
@@ -158,7 +151,7 @@ map_2 <- plot_geo(state_ws, locationmode = 'USA-states') %>%
 map_2
 ```
 
->>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
+
 ## Map showing number of H1b in employer state
 
 ```{r}
@@ -192,13 +185,10 @@ p <- plot_geo(state_number, locationmode = 'USA-states') %>%
 p
 ```
 
-<<<<<<< HEAD
-##Graph showing top 10 cities with H1b cases in California state (worksite)
-=======
-## Graph showing top 10 cities with H1b cases in California state (worksite)
->>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
 
+## Graph showing top 10 cities with H1b cases in California state (worksite)
 ```{r}
+
 city_ca = 
   h1b_2018 %>%
   filter(worksite_state == 'CA') %>% 
@@ -208,14 +198,13 @@ city_ca =
 city_ca %>% 
   mutate(worksite_city = fct_reorder(worksite_city, n)) %>% 
   plot_ly(x = ~worksite_city, y = ~n, color = ~worksite_city, type = "bar")
-<<<<<<< HEAD
-```
-=======
+
 ```
 
 
 ## Companies that have the most H1B Visa Workers
 ```{r}
+#Listed the top 15 companies that the hires the most H1B applicants. 
 h1b_soc = h1b_18_filter %>% 
     select(case_number, employer_name, naics_code, soc_code, soc_name, total_workers, employment_start_date, employment_end_date, full_time_position)
 
@@ -227,8 +216,6 @@ h1b_soc_con = h1b_soc %>%
   arrange(desc(total)) %>% 
   top_n(15)
 
-h1b_soc_con
-  
 h1b_soc_con %>% 
   ggplot(aes(x = reorder(employer_name, total), y = total)) +
   geom_bar(stat = 'identity') +
@@ -243,8 +230,9 @@ h1b_soc_con %>%
   
 Regrouping SOC codes broadly - use bls website as source
 ```{r}
+#The soc code were too specific. The bls website shows that the first two numbers of the soc code categorizes the industry more broadly. Therefore, case_when was used to make a new soc_code variable. Collapsed most of the industries to others for a reasonable graph and table. 
 h1b_soc_ind = h1b_soc %>%
-  select(soc_code) %>% 
+  select(case_number, soc_code) %>% 
   mutate(soc_code_new = str_remove_all(soc_code, '-'),
          soc_code_new = as.integer(soc_code_new)) %>% 
   na.omit() %>% 
@@ -263,12 +251,12 @@ h1b_soc_ind = h1b_soc %>%
     TRUE ~ "Others")) %>% 
   mutate(soc_code_gen = as.factor(soc_code_gen))
   
-h1b_soc_ind
 ```
   
   
 ## Certified H1B applicants and which industries they are in
 ```{r}
+#Using the newly coded industry variable, checked to see which sector is the most popular with the H1B applicants. 
 h1b_soc_small = h1b_soc_ind %>%
   group_by(soc_code_gen) %>%
   summarize(num_ind = n()) %>% 
@@ -296,6 +284,7 @@ h1b_soc_plot
  
 ## Length of time employees were contracted.
 ```{r}
+#Checking to see how long employees are contracted for. Seems like most are contracted for 3 years. There's a minor number of people who are contacted for 2 years or 1 year. 
 library(lubridate)
 h1b_soc_date <- h1b_soc %>%
   select(employment_start_date, employment_end_date) %>%
@@ -313,13 +302,11 @@ date_table <- h1b_soc_date %>%
 ggplot(data = h1b_soc_date, aes(x = length_time)) +
   geom_bar()
 
-
-str(h1b_soc_date)
-h1b_soc_date
 ```
 
 
 ```{r}
+#Checking how the unit of pay actually looks like, before making the new wage variable.
 money = h1b_18_filter %>% 
   select(prevailing_wage, pw_unit_of_pay) 
 summary(money)
@@ -351,5 +338,49 @@ h1b_18_adjusted_wage =
 ```
 
 
+## Annual Wage by industries
+
+```{r}
+# The new annual wage variable and the industries tables are not in the same table, so inner joined by case_number to form one table with both variables.
+h1b_soc_wage = h1b_18_adjusted_wage %>% 
+  select(case_number, adjusted_wage_per_year) %>% 
+  inner_join(h1b_soc_ind) %>% 
+  select(soc_code_gen, adjusted_wage_per_year)%>% 
+  arrange (desc(adjusted_wage_per_year)) %>% 
+  mutate(soc_code_gen = fct_reorder(soc_code_gen, adjusted_wage_per_year))
+
+h1b_wage_plotly = plot_ly(
+    h1b_soc_wage, x = ~soc_code_gen, y = ~adjusted_wage_per_year, color = ~soc_code_gen, type = "box", colors = "Set2"
+    ) %>% 
+        layout(title = 'Industries and wage distribution of certified H1B applicants',
+           xaxis = list(title = 'Industries'),
+           yaxis = list(title = 'Annual Wage'), 
+           showlegend = FALSE)
+
+h1b_wage_plotly
+```
+
+
+## Average Wage by industries
+```{r}
+##Wasn't sure if wage distribution or avg wage was more informative, so decided to do both and see which other group members like best. 
+h1b_avg_wage = h1b_soc_wage %>% 
+  group_by(soc_code_gen) %>% 
+  summarize(avg_wage_ind = mean(adjusted_wage_per_year)) %>% 
+  arrange (desc(avg_wage_ind)) %>% 
+  mutate(soc_code_gen = fct_reorder(soc_code_gen, avg_wage_ind))
+
+
+h1b_avgwage_plot = h1b_avg_wage%>% 
+  plot_ly(x = ~soc_code_gen, y = ~avg_wage_ind, color = ~soc_code_gen, type = "bar", colors = "Set2"
+    ) %>% 
+        layout(title = 'Industries and average wage of certified H1B applicants',
+           xaxis = list(title = 'Industries'),
+           yaxis = list(title = 'Average Wage'), 
+           showlegend = FALSE)
+
+h1b_avgwage_plot
+
+```
 
 
