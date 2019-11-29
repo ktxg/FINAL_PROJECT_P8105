@@ -214,14 +214,27 @@ h1b_soc_con = h1b_soc %>%
   group_by(employer_name) %>% 
   summarize(total = n()) %>% 
   arrange(desc(total)) %>% 
-  top_n(15)
+  top_n(15) %>% 
+  select(employer_name, total) %>% 
+  mutate(employer_name = as.factor(employer_name)) %>% 
+  mutate(employer_name = fct_reorder(employer_name, total))
 
-h1b_soc_con %>% 
-  ggplot(aes(x = reorder(employer_name, total), y = total)) +
-  geom_bar(stat = 'identity') +
-  coord_flip() +
-  labs(x = 'Companies', y = 'Total Workers', 
-       title = 'Top 15 companies who has the most H1B Visa Workers')
+#h1b_soc_con %>% 
+  #ggplot(aes(x = reorder(employer_name, total), y = total)) +
+  #geom_bar(stat = 'identity') +
+  #coord_flip() +
+  #labs(x = 'Companies', y = 'Total Workers', 
+       #title = 'Top 15 companies who has the most H1B Visa Workers')
+
+
+h1b_top_plotly = h1b_soc_con %>% 
+  plot_ly(x = ~employer_name, y = ~total, color = ~employer_name, type = 'bar', colors = "Set2") %>% 
+        layout(title = 'Top 15 companies who has the most H1B Visa Workers',
+           xaxis = list(title = 'Companies'),
+           yaxis = list(title = 'Total Workers'), 
+           showlegend = FALSE)
+
+h1b_top_plotly
 
 ```
   
