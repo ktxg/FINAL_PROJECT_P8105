@@ -49,10 +49,6 @@ h1b_18_filter %>%
 ```
 
 ```{r}
-<<<<<<< HEAD
-=======
-
->>>>>>> 4f144585c6424ba679fab4ab662f88624c16bd66
 h1b_location =
   h1b_18_filter %>% 
   select(case_number, employer_city, employer_state, worksite_city, worksite_state) 
@@ -93,12 +89,9 @@ h1b_location_data %>%
   plot_ly(x = ~state, y = ~employer_number, type = 'bar', name = 'headquater location') %>% 
   add_trace(y = ~worksite_number, name = 'work location') %>%
   layout(yaxis = list(title = 'Count'), barmode = 'group', legend = list(x = 0.1, y = 0.9))
-<<<<<<< HEAD
 ```
 
 
-=======
-```
 
 
 
@@ -130,7 +123,7 @@ map_2 <- plot_geo(state_ws, locationmode = 'USA-states') %>%
 map_2
 ```
 
->>>>>>> 4f144585c6424ba679fab4ab662f88624c16bd66
+
 
 ## Map showing number of H1b in worksite state
 
@@ -193,12 +186,8 @@ p <- plot_geo(state_number, locationmode = 'USA-states') %>%
 p
 ```
 
-<<<<<<< HEAD
 
-## Graph showing top 10 cities with H1b cases in California state (worksite)
 
-=======
->>>>>>> 4f144585c6424ba679fab4ab662f88624c16bd66
 
 ## Graph showing top 10 cities with H1b cases in California state (worksite)
 ```{r}
@@ -211,12 +200,11 @@ city_ca =
   filter(min_rank(desc(n)) <= 10)
 city_ca %>% 
   mutate(worksite_city = fct_reorder(worksite_city, n)) %>% 
-<<<<<<< HEAD
+
   plot_ly(x = ~worksite_city, y = ~n, color = 'Pink', type = "bar")
-=======
+
   plot_ly(x = ~worksite_city, y = ~n, color = ~worksite_city, type = "bar")
 
->>>>>>> 4f144585c6424ba679fab4ab662f88624c16bd66
 ```
 
 
@@ -359,11 +347,10 @@ h1b_18_adjusted_wage =
 ## this converts all pay wages to yearly 
 h1b_18_adjusted_wage = 
   h1b_18_adjusted_wage %>%
-<<<<<<< HEAD
+
   select(pw_unit_of_pay, adjusted_wage_per_year, prevailing_wage, worksite_state, employer_state) %>% 
-=======
+
 ##select(pw_unit_of_pay, adjusted_wage_per_year, prevailing_wage) %>% 
->>>>>>> 4f144585c6424ba679fab4ab662f88624c16bd66
   mutate(adjusted_wage_per_year = 
            if_else(pw_unit_of_pay == "hour", prevailing_wage * 40 * 52, 
                    if_else(pw_unit_of_pay == "week", prevailing_wage * 52, 
@@ -432,9 +419,10 @@ p4 <- plot_geo(wage_state2, locationmode = 'USA-states') %>%
     geo = g4
   )
 
-<<<<<<< HEAD
+
 p4
-=======
+```
+
 ## Annual Wage by industries
 
 ```{r}
@@ -455,7 +443,6 @@ h1b_wage_plotly = plot_ly(
            showlegend = FALSE)
 
 h1b_wage_plotly
->>>>>>> 4f144585c6424ba679fab4ab662f88624c16bd66
 ```
 
 
@@ -482,7 +469,4 @@ h1b_avgwage_plot
 ```
 
 
-<<<<<<< HEAD
-  
-=======
->>>>>>> 4f144585c6424ba679fab4ab662f88624c16bd66
+
