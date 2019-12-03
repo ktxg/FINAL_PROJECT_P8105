@@ -48,13 +48,7 @@ h1b_18_filter %>%
   summarize(state_n = n())
 ```
 
-
 ```{r}
-<<<<<<< HEAD
- 
-```
-
-=======
 h1b_location =
   h1b_18_filter %>% 
   select(case_number, employer_city, employer_state, worksite_city, worksite_state) 
@@ -95,7 +89,7 @@ h1b_location_data %>%
   plot_ly(x = ~state, y = ~employer_number, type = 'bar', name = 'headquater location') %>% 
   add_trace(y = ~worksite_number, name = 'work location') %>%
   layout(yaxis = list(title = 'Count'), barmode = 'group', legend = list(x = 0.1, y = 0.9))
->>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
+```
 
 
 
@@ -126,39 +120,7 @@ map_2 <- plot_geo(state_ws, locationmode = 'USA-states') %>%
 map_2
 ```
 
-<<<<<<< HEAD
-=======
 
-
-
-## Map showing number of H1b in worksite state
-
-```{r}
-state_ws = 
-  h1b_2018 %>%
-  group_by(worksite_state) %>%
-  summarize(n = n())
-state_ws$hover <- with(state_ws, paste("State", worksite_state, "<br>", "Number", n))
-g2 <- list(
-  scope = 'usa',
-  projection = list(type = 'albers usa'),
-  showlakes = TRUE,
-  lakecolor = toRGB('white')
-)
-map_2 <- plot_geo(state_ws, locationmode = 'USA-states') %>%
-  add_trace(
-    z = ~n, text = ~hover, locations = ~worksite_state,
-    color = ~n, colors = 'Greens'
-  ) %>%
-  colorbar(title = "H1b Case Number") %>%
-  layout(
-    title = '2018 US H1b by worksite State',
-    geo = g2
-  )
-map_2
-```
-
->>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
 ## Map showing number of H1b in employer state
 
 ```{r}
@@ -192,11 +154,9 @@ p <- plot_geo(state_number, locationmode = 'USA-states') %>%
 p
 ```
 
-<<<<<<< HEAD
-##Graph showing top 10 cities with H1b cases in California state (worksite)
-=======
+
 ## Graph showing top 10 cities with H1b cases in California state (worksite)
->>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
+
 
 ```{r}
 city_ca = 
@@ -207,14 +167,12 @@ city_ca =
   filter(min_rank(desc(n)) <= 10)
 city_ca %>% 
   mutate(worksite_city = fct_reorder(worksite_city, n)) %>% 
-  plot_ly(x = ~worksite_city, y = ~n, color = ~worksite_city, type = "bar")
-<<<<<<< HEAD
-```
-=======
+  plot_ly(x = ~worksite_city, y = ~n, color = 'Pink', type = "bar")
 ```
 
 
 ## Companies that have the most H1B Visa Workers
+
 ```{r}
 h1b_soc = h1b_18_filter %>% 
     select(case_number, employer_name, naics_code, soc_code, soc_name, total_workers, employment_start_date, employment_end_date, full_time_position)
@@ -340,7 +298,7 @@ h1b_18_adjusted_wage =
 ## this converts all pay wages to yearly 
 h1b_18_adjusted_wage = 
   h1b_18_adjusted_wage %>%
-  ## select(pw_unit_of_pay, adjusted_wage_per_year, prevailing_wage) %>% 
+  select(pw_unit_of_pay, adjusted_wage_per_year, prevailing_wage, worksite_state, employer_state) %>% 
   mutate(adjusted_wage_per_year = 
            if_else(pw_unit_of_pay == "hour", prevailing_wage * 40 * 52, 
                    if_else(pw_unit_of_pay == "week", prevailing_wage * 52, 
@@ -350,9 +308,68 @@ h1b_18_adjusted_wage =
 
 ```
 
+**Map showing wages in employer state** 
 
+```{r}
+wage_state = 
+  h1b_18_adjusted_wage %>% 
+  group_by(employer_state) %>%
+  summarize(mean_wage = mean(adjusted_wage_per_year))
+
+wage_state$hover <- with(wage_state, paste("State", employer_state, "<br>", "Mean wage", mean_wage))
+
+g3 <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+
+p3 <- plot_geo(wage_state, locationmode = 'USA-states') %>%
+  add_trace(
+    z = ~mean_wage, text = ~hover, locations = ~employer_state,
+    color = ~mean_wage, colors = 'Oranges'
+  ) %>%
+  colorbar(title = "Mean wage") %>%
+  layout(
+    title = '2018 US H1b mean wage by State',
+    geo = g3
+  )
+
+p3
+```
+
+**Map showing wages in worksite state** 
+
+```{r}
+wage_state2 = 
+  h1b_18_adjusted_wage %>% 
+  group_by(worksite_state) %>%
+  summarize(mean_wage = mean(adjusted_wage_per_year))
+
+wage_state2$hover <- with(wage_state2, paste("State", worksite_state, "<br>", "Mean wage", mean_wage))
+
+g4 <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+
+p4 <- plot_geo(wage_state2, locationmode = 'USA-states') %>%
+  add_trace(
+    z = ~mean_wage, text = ~hover, locations = ~worksite_state,
+    color = ~mean_wage, colors = 'Blues'
+  ) %>%
+  colorbar(title = "Mean wage") %>%
+  layout(
+    title = '2018 US H1b mean wage by State',
+    geo = g4
+  )
+
+p4
+```
 
 
 
   
->>>>>>> 55da0ffbb28ced05a48a92b1a4967b20008fe176
